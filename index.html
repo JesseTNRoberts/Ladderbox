@@ -72,7 +72,7 @@ button{cursor:pointer}
 .fault b{color:var(--fault);font-family:var(--display);letter-spacing:.06em;text-transform:uppercase}
 
 /* panes */
-.main{--rw:440px;flex:1;min-height:0;display:grid;gap:10px;grid-template-columns:minmax(380px,440px) minmax(0,1fr) var(--rw);grid-template-areas:"tags lad code"}
+.main{--rw:440px;--tw:420px;--th:34%;flex:1;min-height:0;display:grid;gap:10px;grid-template-columns:var(--tw) minmax(0,1fr) var(--rw);grid-template-areas:"tags lad code"}
 .pane{background:var(--panel);border:1px solid var(--line);border-radius:7px;display:flex;flex-direction:column;min-height:0;min-width:0;overflow:hidden}
 .tags{grid-area:tags}.lad{grid-area:lad}.code{grid-area:code}
 .ph{display:flex;align-items:baseline;gap:10px;padding:9px 12px 8px;border-bottom:1px solid var(--line);flex-wrap:wrap}
@@ -235,8 +235,10 @@ details.ref summary{padding:7px 12px;cursor:pointer;font-family:var(--display);f
 .toast{position:fixed;z-index:50;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--raised);padding:8px 14px;border-radius:6px;font-size:13px;max-width:min(520px,calc(100vw - 32px));z-index:20;box-shadow:0 6px 20px rgba(0,0,0,.2)}
 
 @media (max-width:1699px){
-  .main{grid-template-columns:minmax(0,1fr) var(--rw);grid-template-rows:minmax(0,1fr) minmax(220px,34%);grid-template-areas:"lad code" "tags tags"}
+  .main{grid-template-columns:minmax(0,1fr) var(--rw);grid-template-rows:minmax(0,1fr) var(--th);grid-template-areas:"lad code" "tags tags"}
+  #splitT{display:none}
 }
+@media (min-width:1700px){#splitH{display:none}}
 @media (max-width:820px){
   html,body{height:auto}
   .app{height:auto}
@@ -386,8 +388,17 @@ pre.sk{flex:1;min-height:0;overflow:auto;margin:0;background:var(--code-bg);bord
 .win-rev{display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:13px}
 .code{position:relative;overflow:visible}
 .code > .ph,.code > div:not(.split){border-radius:inherit}
-.split{position:absolute;left:-9px;top:0;bottom:0;width:8px;cursor:col-resize;z-index:3;border-radius:4px}
-.split:hover,.split:focus-visible{background:var(--sel-soft);outline:0}
+.split{position:absolute;left:-10px;top:0;bottom:0;width:10px;cursor:col-resize;z-index:3;border-radius:4px;touch-action:none}
+.split::after{content:"";position:absolute;left:3px;top:50%;width:4px;height:44px;margin-top:-22px;border-radius:2px;background:var(--line)}
+.split.h{left:0;right:0;top:-10px;bottom:auto;width:auto;height:10px;cursor:row-resize}
+.split.h::after{left:50%;top:3px;width:44px;height:4px;margin:0 0 0 -22px}
+.split:hover,.split:focus-visible,.split.drag{background:var(--sel-soft);outline:0}
+.split:hover::after,.split:focus-visible::after,.split.drag::after{background:var(--sel)}
+.lad,.tags{position:relative;overflow:visible}
+.lad > :first-child,.tags > :first-child{border-radius:7px 7px 0 0}
+.lad > :last-child,.tags > :last-child{border-radius:0 0 7px 7px}
+body.resizing{user-select:none;cursor:col-resize}body.resizing.rows{cursor:row-resize}
+body.resizing iframe,body.resizing canvas{pointer-events:none}
 .ph.tabs{overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}
 .ph.tabs::-webkit-scrollbar{display:none}
 .tab{white-space:nowrap;font-size:13.5px;padding:10px 9px 8px}
@@ -505,6 +516,7 @@ svg.mrung{display:block;overflow:visible}
 
   <main class="main">
     <section class="pane tags" aria-label="Controller tags">
+      <div class="split h" id="splitH" role="separator" aria-orientation="horizontal" aria-label="Resize the tag table" title="Drag to resize. Double-click to reset." tabindex="0"></div>
       <div class="ph"><h2>Controller Tags</h2><span class="crumb" id="scopeName">Scope: Conveyor_Cell</span><input id="tagFilter" placeholder="Filter tags" aria-label="Filter tags"></div>
       <div class="tscroll">
         <table class="tt">
@@ -520,6 +532,7 @@ svg.mrung{display:block;overflow:visible}
     </section>
 
     <section class="pane lad" aria-label="Ladder routine">
+      <div class="split" id="splitT" role="separator" aria-orientation="vertical" aria-label="Resize the tag table and ladder" title="Drag to resize. Double-click to reset." tabindex="0"></div>
       <div class="ph"><h2>MainRoutine</h2><span class="crumb">MainTask › MainProgram · Ladder Diagram</span><button class="btn" id="btnAddRung">Add rung</button></div>
       <div class="lscroll" id="lscroll" tabindex="0"><div id="ladder"></div></div>
       <div class="insp" id="insp"></div>
@@ -527,7 +540,7 @@ svg.mrung{display:block;overflow:visible}
 
     <section class="pane code" aria-label="C source">
       <div class="ph tabs" role="tablist"><button role="tab" class="tab" id="tab_book" aria-selected="false" aria-controls="bookView">Book</button><button role="tab" class="tab" id="tab_lesson" aria-selected="false" aria-controls="lessonView">Lesson</button><button role="tab" class="tab" id="tab_code" aria-selected="true" aria-controls="codeView">Structured C</button><button role="tab" class="tab" id="tab_hmi" aria-selected="false" aria-controls="hmiView">HMI</button><button role="tab" class="tab" id="tab_sim" aria-selected="false" aria-controls="simView">Simulation</button><button role="tab" class="tab" id="tab_world" aria-selected="false" aria-controls="worldView">3D World</button></div>
-      <div class="split" id="split" role="separator" aria-orientation="vertical" aria-label="Resize the right pane" tabindex="0"></div>
+      <div class="split" id="split" role="separator" aria-orientation="vertical" aria-label="Resize the right pane" title="Drag to resize. Double-click to reset." tabindex="0"></div>
       <div class="simview" id="simView" role="tabpanel" hidden><div class="noscene" id="simEmpty"><p>The transmission cell is a press and spin-test station with three pneumatic cylinders and a VFD-driven motor. Load it to program the process.</p><button class="btn" id="btnLoadTrans">Load the transmission cell</button></div><div id="simBody"></div></div>
       <div class="simview" id="worldView" role="tabpanel" hidden><div class="noscene" id="worldEmpty"><p>The 3D world is a package sorting line: a feeder, a belt, photo-eyes, a height beam, a pusher and a stack light, all driven by your PLC.</p><button class="btn" id="btnLoadSort">Load the sorting line</button></div><div id="worldBody"></div></div>
       <div class="lessonview" id="lessonView" role="tabpanel" hidden></div>
@@ -2842,7 +2855,8 @@ function css(n){ return getComputedStyle(document.documentElement).getPropertyVa
 function drawMaze(){
   if(hmi.scene!=='maze' || hmiView.hidden) return;
   const wrap = cv.parentElement, W = MZ.W, H = MZ.H;
-  const cs = Math.max(18, Math.floor(Math.min((wrap.clientWidth - 8) / W, 320 / H)));
+  const room = Math.max(320, hmiView.clientHeight - 190);
+  const cs = Math.max(18, Math.floor(Math.min((wrap.clientWidth - 8) / W, room / H)));
   const pw = cs*W + 8, ph = cs*H + 8, dpr = window.devicePixelRatio || 1;
   if(cv.width !== pw*dpr || cv.height !== ph*dpr){ cv.width = pw*dpr; cv.height = ph*dpr; cv.style.width = pw + 'px'; cv.style.height = ph + 'px'; }
   const g = cx2; g.setTransform(dpr, 0, 0, dpr, 4, 4); g.setTransform(dpr, 0, 0, dpr, 4*dpr, 4*dpr);
@@ -3798,7 +3812,8 @@ function openBrowser(){
 let sceneCtl = null, trendHist = {};
 function pal(){ return {ink:css('--ink'), muted:css('--muted'), line:css('--line'), raised:css('--raised'), panel:css('--panel'), power:css('--power'), soft:css('--power-soft'), amber:css('--amber'), fault:css('--fault'), sel:css('--sel'), rail:css('--rail'), ground:css('--ground')}; }
 function prep(cv, w, h){
-  const avail = Math.max(200, cv.parentElement.clientWidth - 4), W = Math.min(w, avail), s = W / w, H = Math.round(h * s), dpr = window.devicePixelRatio || 1;
+  const pane = cv.closest('.hmi, .simview'), room = pane ? Math.max(h, pane.clientHeight - 170) : h;
+  const avail = Math.max(200, cv.parentElement.clientWidth - 4), W = Math.min(w * 2.5, avail, room * w / h), s = W / w, H = Math.round(h * s), dpr = window.devicePixelRatio || 1;
   if(cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)){ cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); cv.style.width = W + 'px'; cv.style.height = H + 'px'; }
   const g = cv.getContext('2d'); g.setTransform(dpr * s, 0, 0, dpr * s, 0, 0); g.clearRect(0, 0, w, h); return g;
 }
@@ -4648,12 +4663,27 @@ window.addEventListener('pagehide', () => { try { stashSlot(); writeMain(); } ca
 document.addEventListener('visibilitychange', () => { if(document.hidden){ try { stashSlot(); writeMain(); } catch(e){} } });
 $('btnLoadTrans').onclick = () => openLesson('trans');
 $('btnLoadSort').onclick = () => openLesson('sorter');
-(() => { const main = document.querySelector('.main'), sp = $('split'); let w0 = null; try { const v = +localStorage.getItem('ladderbox.rw'); if(v) main.style.setProperty('--rw', v + 'px'); } catch(e){}
-  const setW = w => { w = Math.max(320, Math.min(window.innerWidth - 520, w)); main.style.setProperty('--rw', w + 'px'); try { localStorage.setItem('ladderbox.rw', Math.round(w)); } catch(e){} };
-  sp.addEventListener('pointerdown', e => { sp.setPointerCapture(e.pointerId); w0 = {x:e.clientX, w:sp.parentElement.getBoundingClientRect().width}; });
-  sp.addEventListener('pointermove', e => { if(w0) setW(w0.w - (e.clientX - w0.x)); });
-  sp.addEventListener('pointerup', () => { w0 = null; });
-  sp.addEventListener('keydown', e => { const w = sp.parentElement.getBoundingClientRect().width; if(e.key==='ArrowLeft') setW(w + 24); if(e.key==='ArrowRight') setW(w - 24); }); })();
+(() => { const main = document.querySelector('.main');
+  /* el: the handle; v: CSS variable; sign: +1 when dragging right/down grows the pane; lim(): [min, max]; size(): current px */
+  const mk = (el, v, key, def, rows, sign, size, lim) => {
+    let st = null;
+    const set = (x, keep) => { const [lo, hi] = lim(); x = Math.round(Math.max(lo, Math.min(Math.max(lo, hi), x))); main.style.setProperty(v, x + 'px'); if(keep !== false){ try { localStorage.setItem(key, x); } catch(e){} } window.dispatchEvent(new Event('resize')); };
+    try { const x = +localStorage.getItem(key); if(x > 0) main.style.setProperty(v, x + 'px'); } catch(e){}
+    el.addEventListener('pointerdown', e => { if(e.button) return; e.preventDefault(); el.setPointerCapture(e.pointerId); st = {p: rows ? e.clientY : e.clientX, s: size()}; el.classList.add('drag'); document.body.classList.add('resizing'); document.body.classList.toggle('rows', rows); });
+    el.addEventListener('pointermove', e => { if(st) set(st.s + sign * ((rows ? e.clientY : e.clientX) - st.p)); });
+    const end = () => { st = null; el.classList.remove('drag'); document.body.classList.remove('resizing', 'rows'); };
+    el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end); el.addEventListener('lostpointercapture', end);
+    el.addEventListener('dblclick', () => { main.style.setProperty(v, def); try { localStorage.removeItem(key); } catch(e){} window.dispatchEvent(new Event('resize')); });
+    el.addEventListener('keydown', e => { const k = rows ? {ArrowUp:-1, ArrowDown:1} : {ArrowLeft:-1, ArrowRight:1}; if(k[e.key]){ e.preventDefault(); set(size() + sign * k[e.key] * (e.shiftKey ? 80 : 24)); } });
+  };
+  const W = () => main.getBoundingClientRect().width, H = () => main.getBoundingClientRect().height;
+  const wide = () => matchMedia('(min-width:1700px)').matches;
+  const rect = sel => main.querySelector(sel).getBoundingClientRect();
+  const LAD_MIN = 300;
+  mk($('split'), '--rw', 'ladderbox.rw', '440px', false, -1, () => rect('.code').width, () => [300, W() - LAD_MIN - (wide() ? rect('.tags').width + 10 : 0) - 10]);
+  mk($('splitT'), '--tw', 'ladderbox.tw', '420px', false, 1, () => rect('.tags').width, () => [260, W() - LAD_MIN - rect('.code').width - 20]);
+  mk($('splitH'), '--th', 'ladderbox.th', '34%', true, -1, () => rect('.tags').height, () => [120, H() - 220]);
+})();
 setTab(PANES[hmi.tab] ? hmi.tab : 'code');
 })();
 </script>
